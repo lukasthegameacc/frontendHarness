@@ -8,47 +8,25 @@
 # Setup
 
 ```
+PLUGIN_NAME="lukas-plugin"
 mkdir -p plugins
-ln -sfn .. plugins/my-plugin
+ln -sfn .. "plugins/${PLUGIN_NAME}"
 ```
 
 # Enroll Plugin
 
 ```bash
-# Codex
-PLUGIN_ROOT="$(pwd)"
-PLUGIN_ID="lukas-plugin@lukas-plugin"
+./scripts/plugin.sh codex install
+./scripts/plugin.sh codex remove
+./scripts/plugin.sh codex reload
 
-codex plugin marketplace add "$PLUGIN_ROOT" --json
-codex plugin add "$PLUGIN_ID" --json
-codex plugin list | grep lukas
-
-## Remove Plugin
-# codex plugin remove "$PLUGIN_ID" --json
-
-## Reload after updating
-# claude plugin marketplace update my-plugin-local || true
-# claude plugin update $PLUGIN_ID || true
-# claude plugin details $PLUGIN_ID
+./scripts/plugin.sh claude install
+./scripts/plugin.sh claude remove
+./scripts/plugin.sh claude reload
 ```
 
-```bash
-# Claude
-PLUGIN_ROOT="$(pwd)"
-PLUGIN_ID="lukas-plugin@lukas-plugin"
-
-claude plugin marketplace add "$PLUGIN_ROOT"
-claude plugin install "$PLUGIN_ID"
-claude plugin enable "$PLUGIN_ID"
-claude plugin details "$PLUGIN_ID"
-
-## Disable plugin
-# claude plugin disable "$PLUGIN_ID"
-
-## Reload after updating
-# codex plugin remove my-plugin@my-plugin-local --json || true
-# rm -rf "$HOME/.codex/plugins/cache/my-plugin-local/my-plugin"
-# codex plugin marketplace add "$PLUGIN_ROOT" --json
-# codex plugin add "$PLUGIN_ID" --json
-```
+- `install` : 이 원격저장소의 plugin 설치
+- `remove` : plugin 제거
+- `reload` : plugin 업데이트
+  - 업데이트 후 codex, claude 세션 모두 재실행 필요
 
