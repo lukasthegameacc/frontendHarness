@@ -1,0 +1,20 @@
+{
+  "name": "lukas-plugin",
+  "interface": {
+    "displayName": "Personal plugin"
+  },
+  "plugins": [
+    {
+      "name": "lukas-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/my-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

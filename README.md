@@ -17,11 +17,11 @@ ln -sfn .. plugins/my-plugin
 ```bash
 # Codex
 PLUGIN_ROOT="$(pwd)"
-PLUGIN_ID="my-plugin@my-plugin-local"
+PLUGIN_ID="lukas-plugin@lukas-plugin"
 
 codex plugin marketplace add "$PLUGIN_ROOT" --json
 codex plugin add "$PLUGIN_ID" --json
-codex plugin list
+codex plugin list | grep lukas
 
 ## Remove Plugin
 # codex plugin remove "$PLUGIN_ID" --json
@@ -35,7 +35,7 @@ codex plugin list
 ```bash
 # Claude
 PLUGIN_ROOT="$(pwd)"
-PLUGIN_ID="my-plugin@my-plugin-local"
+PLUGIN_ID="lukas-plugin@lukas-plugin"
 
 claude plugin marketplace add "$PLUGIN_ROOT"
 claude plugin install "$PLUGIN_ID"

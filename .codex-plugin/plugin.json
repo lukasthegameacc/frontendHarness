@@ -1,0 +1,17 @@
+{
+  "name": "lukas-plugin",
+  "version": "0.1.0",
+  "description": "Personal Codex plugin",
+  "author": {
+    "name": "lukas"
+  },
+  "skills": "./skills/",
+  "hooks": "./hooks/block-env-edits.sh",
+  "interface": {
+    "displayName": "Lukas's Plugin",
+    "shortDescription": "Personal plugin",
+    "developerName": "lukas",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"]
+  }
+}
