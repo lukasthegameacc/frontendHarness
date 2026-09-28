@@ -5,7 +5,6 @@
       "url": "https://mcp.notion.com/mcp"
     },
     "aws-api": {
-      "type": "stdio",
       "command": "uvx",
       "args": [
         "awslabs.aws-api-mcp-server@latest"
@@ -15,12 +14,10 @@
       }
     },
     "aws-docs": {
-      "type": "stdio",
       "command": "uvx",
       "args": [
         "awslabs.aws-documentation-mcp-server@latest"
-      ],
-      "env": {}
+      ]
     },
     "aws-eks": {
       "command": "uvx",
@@ -33,9 +30,7 @@
         "FASTMCP_LOG_LEVEL": "ERROR",
         "AWS_PROFILE": "${AWS_PROFILE}",
         "AWS_REGION": "${AWS_REGION}"
-      },
-      "autoApprove": [],
-      "disabled": false
+      }
     },
     "terraform": {
       "command": "docker",
