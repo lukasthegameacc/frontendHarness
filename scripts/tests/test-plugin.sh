@@ -26,7 +26,7 @@ STUB
 done
 
 run() {
-  HOME="$FAKE_HOME" PATH="$STUB_BIN:$PATH" "$SCRIPT" "$@"
+  HOME="$FAKE_HOME" CODEX_HOME="$FAKE_HOME/.codex" PATH="$STUB_BIN:$PATH" "$SCRIPT" "$@"
 }
 
 expect_usage_error() {
@@ -48,6 +48,9 @@ run codex install >/dev/null
 [[ "$(sed -n 1p "$CALL_LOG")" == "codex plugin marketplace add $ROOT_DIR --json" ]]
 [[ "$(sed -n 2p "$CALL_LOG")" == "codex plugin add $PLUGIN_ID --json" ]]
 [[ "$(sed -n 3p "$CALL_LOG")" == "codex plugin list" ]]
+CODEX_CONFIG="$FAKE_HOME/.codex/config.toml"
+grep -qx "\[hooks.state.\"$PLUGIN_ID:hooks/hooks.json:pre_tool_use:0:0\"\]" "$CODEX_CONFIG"
+grep -qE '^trusted_hash = "sha256:[0-9a-f]{64}"$' "$CODEX_CONFIG"
 
 : > "$CALL_LOG"
 run codex remove >/dev/null
@@ -61,6 +64,7 @@ run codex reload >/dev/null
 [[ "$(sed -n 2p "$CALL_LOG")" == "codex plugin marketplace add $ROOT_DIR --json" ]]
 [[ "$(sed -n 3p "$CALL_LOG")" == "codex plugin add $PLUGIN_ID --json" ]]
 [[ ! -e "$CACHE_DIR" ]]
+[[ "$(grep -c "$PLUGIN_ID:hooks/hooks.json" "$CODEX_CONFIG")" == 1 ]]
 
 : > "$CALL_LOG"
 run claude install >/dev/null
