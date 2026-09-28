@@ -6,7 +6,7 @@
     "name": "lukas"
   },
   "skills": "./skills/",
-  "hooks": "./hooks/block-env-edits.sh",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Lukas's Plugin",
     "shortDescription": "Personal plugin",
