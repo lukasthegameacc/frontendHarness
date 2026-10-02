@@ -4,6 +4,7 @@
   "description": "Personal Claude Code plugin",
   "skills": "./skills/",
   "dependencies": [
-    { "name": "ponytail", "marketplace": "ponytail" }
+    { "name": "ponytail", "marketplace": "ponytail" },
+    { "name": "impeccable", "marketplace": "impeccable" }
   ]
 }

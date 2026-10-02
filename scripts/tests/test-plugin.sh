@@ -8,6 +8,9 @@ MARKETPLACE_NAME="$(jq -r '.name' "$ROOT_DIR/.claude-plugin/marketplace.json")"
 PLUGIN_ID="${PLUGIN_NAME}@${MARKETPLACE_NAME}"
 DEP_ID="ponytail@ponytail"
 DEP_SRC="DietrichGebert/ponytail"
+CLAUDE_DEP_ID="impeccable@impeccable"
+CLAUDE_DEP_SRC="pbakaus/impeccable"
+IMPECCABLE_CODEX="npx -y impeccable install --providers=codex --scope=user --yes --no-hooks"
 
 SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
@@ -23,7 +26,7 @@ echo '{"name":"ponytail","hooks":"./hooks/codex-hooks.json"}' > "$INSTALLED/pony
 echo '{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"true"}]}]}}' > "$INSTALLED/ponytail/hooks/codex-hooks.json"
 
 # codex/claude are stubbed so this test never touches the real CLIs or ~/.codex.
-for name in codex claude; do
+for name in codex claude npx; do
   cat > "$STUB_BIN/$name" <<STUB
 #!/usr/bin/env bash
 echo "$name \$*" >> "$CALL_LOG"
@@ -69,6 +72,7 @@ expect_calls \
   "codex plugin add $PLUGIN_ID --json" \
   "codex plugin marketplace add $DEP_SRC --json" \
   "codex plugin add $DEP_ID --json" \
+  "$IMPECCABLE_CODEX" \
   "codex plugin list"
 [[ "$(trust_count "$PLUGIN_ID:hooks/hooks.json:pre_tool_use")" == 1 ]]
 [[ "$(trust_count "$DEP_ID:hooks/codex-hooks.json:session_start")" == 1 ]]
@@ -87,7 +91,8 @@ expect_calls \
   "codex plugin marketplace add $ROOT_DIR --json" \
   "codex plugin add $PLUGIN_ID --json" \
   "codex plugin marketplace add $DEP_SRC --json" \
-  "codex plugin add $DEP_ID --json"
+  "codex plugin add $DEP_ID --json" \
+  "$IMPECCABLE_CODEX"
 [[ ! -e "$CACHE_DIR" ]]
 [[ "$(trust_count "$PLUGIN_ID")" == 1 ]]
 [[ "$(trust_count "$DEP_ID")" == 1 ]]
@@ -96,6 +101,7 @@ expect_calls \
 run claude install >/dev/null
 expect_calls \
   "claude plugin marketplace add $DEP_SRC" \
+  "claude plugin marketplace add $CLAUDE_DEP_SRC" \
   "claude plugin marketplace add $ROOT_DIR" \
   "claude plugin install $PLUGIN_ID" \
   "claude plugin enable $PLUGIN_ID" \
@@ -109,14 +115,17 @@ expect_calls "claude plugin disable $PLUGIN_ID"
 run claude reload >/dev/null
 expect_calls \
   "claude plugin marketplace add $DEP_SRC" \
+  "claude plugin marketplace add $CLAUDE_DEP_SRC" \
   "claude plugin marketplace update $MARKETPLACE_NAME" \
   "claude plugin update $PLUGIN_ID" \
   "claude plugin details $PLUGIN_ID"
 
-jq -e --arg n "${DEP_ID%@*}" --arg m "${DEP_ID#*@}" \
-  '.dependencies[] | select(.name == $n and .marketplace == $m)' \
-  "$ROOT_DIR/.claude-plugin/plugin.json" >/dev/null
-jq -e --arg m "${DEP_ID#*@}" '.allowCrossMarketplaceDependenciesOn | index($m)' \
-  "$ROOT_DIR/.claude-plugin/marketplace.json" >/dev/null
+for id in "$DEP_ID" "$CLAUDE_DEP_ID"; do
+  jq -e --arg n "${id%@*}" --arg m "${id#*@}" \
+    '.dependencies[] | select(.name == $n and .marketplace == $m)' \
+    "$ROOT_DIR/.claude-plugin/plugin.json" >/dev/null
+  jq -e --arg m "${id#*@}" '.allowCrossMarketplaceDependenciesOn | index($m)' \
+    "$ROOT_DIR/.claude-plugin/marketplace.json" >/dev/null
+done
 
 echo "ok"

@@ -16,7 +16,9 @@ MARKETPLACE_NAME="$(jq -r '.name' "$ROOT_DIR/.claude-plugin/marketplace.json")"
 PLUGIN_ID="${PLUGIN_NAME}@${MARKETPLACE_NAME}"
 
 # "<plugin>@<marketplace> <marketplace source>". Claude also needs each in .claude-plugin/plugin.json "dependencies".
-DEPS=("ponytail@ponytail DietrichGebert/ponytail")
+CODEX_DEPS=("ponytail@ponytail DietrichGebert/ponytail")
+# impeccable ships no Codex plugin, so install_codex_deps puts its skill in ~/.agents/skills via its own CLI.
+CLAUDE_DEPS=("${CODEX_DEPS[@]}" "impeccable@impeccable pbakaus/impeccable")
 
 # Codex skips plugin hooks until trusted; write the trust hashes it would write after TUI review.
 trust_codex_hooks() {
@@ -30,19 +32,21 @@ trust_codex_hooks() {
 
 install_codex_deps() {
   local dep id src out
-  for dep in "${DEPS[@]}"; do
+  for dep in "${CODEX_DEPS[@]}"; do
     read -r id src <<<"$dep"
     codex plugin marketplace add "$src" --json
     out="$(codex plugin add "$id" --json)"
     echo "$out"
     trust_codex_hooks "$(jq -r '.installedPath' <<<"$out")" "$id"
   done
+  # --no-hooks: its Codex hook is project-local (.codex/hooks.json), not something a user-scope install can set up.
+  npx -y impeccable install --providers=codex --scope=user --yes --no-hooks
 }
 
 # Claude installs dependencies itself, but only from marketplaces it already knows.
 add_claude_dep_marketplaces() {
   local dep id src
-  for dep in "${DEPS[@]}"; do
+  for dep in "${CLAUDE_DEPS[@]}"; do
     read -r id src <<<"$dep"
     claude plugin marketplace add "$src"
   done

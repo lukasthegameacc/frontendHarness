@@ -3,7 +3,7 @@
   "owner": {
     "name": "lukas"
   },
-  "allowCrossMarketplaceDependenciesOn": ["ponytail"],
+  "allowCrossMarketplaceDependenciesOn": ["ponytail", "impeccable"],
   "plugins": [
     {
       "name": "lukas-plugin",
