@@ -98,7 +98,7 @@ expect_calls \
   "codex plugin add $DEP_ID --json" \
   "$IMPECCABLE_CODEX"
 [[ ! -e "$CACHE_DIR" ]]
-[[ "$(trust_count "$PLUGIN_ID")" == 1 ]]
+[[ "$(trust_count "$PLUGIN_ID")" == 2 ]]
 [[ "$(trust_count "$DEP_ID")" == 1 ]]
 
 : > "$CALL_LOG"
@@ -124,7 +124,8 @@ expect_calls \
   "claude plugin marketplace add $DEP_SRC" \
   "claude plugin marketplace add $CLAUDE_DEP_SRC" \
   "claude plugin marketplace update $MARKETPLACE_NAME" \
-  "claude plugin update $PLUGIN_ID" \
+  "claude plugin uninstall $PLUGIN_ID" \
+  "claude plugin install $PLUGIN_ID" \
   "claude plugin details $PLUGIN_ID"
 
 for id in "$DEP_ID" "$CLAUDE_DEP_ID"; do

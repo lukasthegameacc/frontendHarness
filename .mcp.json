@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "glitchtip": {
+      "type": "http",
+      "url": "http://localhost:38088/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GLITCHTIP_MCP_TOKEN}"
+      },
+      "bearer_token_env_var": "GLITCHTIP_MCP_TOKEN"
+    },
     "notion": {
       "type": "http",
       "url": "https://mcp.notion.com/mcp"

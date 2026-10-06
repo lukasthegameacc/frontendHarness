@@ -7,7 +7,7 @@
 - 인스턴스: `https://glitchtip.thegame-sam.com`
 - 조직 slug: `thegame`
 - 이슈 URL 형식: `https://glitchtip.thegame-sam.com/thegame/issues/<issue_id>`
-- MCP (이 머신의 로컬 설정, 다른 환경에서는 활성 MCP 설정을 먼저 확인): `http://localhost:8088/mcp`, bearer 토큰 env `GLITCHTIP_MCP_TOKEN` (Codex `~/.codex/config.toml`의 `[mcp_servers.glitchtip]`)
+- MCP: `http://localhost:38088/mcp`, bearer 토큰 env `GLITCHTIP_MCP_TOKEN` (플러그인 `.mcp.json`의 `glitchtip`). 포트는 SessionStart 훅의 `scripts/glitchtip-forward.sh`가 `kubectl port-forward`로 열어 두고 끊기면 다시 붙는다
 
 ## samcommon-labeling-ai (backend)
 

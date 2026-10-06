@@ -84,6 +84,7 @@ case "$TOOL" in
       remove)
         codex plugin remove "$PLUGIN_ID" --json
         remove_codex_deps
+        "$ROOT_DIR/scripts/glitchtip-forward.sh" stop
         ;;
       reload)
         codex plugin remove "$PLUGIN_ID" --json || true
@@ -108,11 +109,14 @@ case "$TOOL" in
       remove)
         claude plugin uninstall "$PLUGIN_ID"
         remove_claude_deps
+        "$ROOT_DIR/scripts/glitchtip-forward.sh" stop
         ;;
       reload)
         add_claude_dep_marketplaces
         claude plugin marketplace update "$MARKETPLACE_NAME" || true
-        claude plugin update "$PLUGIN_ID" || true
+        # `plugin update` is a no-op while the version stays 0.1.0, so reinstall to refresh the cache.
+        claude plugin uninstall "$PLUGIN_ID" || true
+        claude plugin install "$PLUGIN_ID"
         claude plugin details "$PLUGIN_ID"
         ;;
       *) usage ;;
