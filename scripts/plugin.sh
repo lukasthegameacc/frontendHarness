@@ -43,6 +43,25 @@ install_codex_deps() {
   npx -y impeccable install --providers=codex --scope=user --yes --no-hooks
 }
 
+remove_codex_deps() {
+  local dep id src
+  for dep in "${CODEX_DEPS[@]}"; do
+    read -r id src <<<"$dep"
+    codex plugin remove "$id" --json
+  done
+  # impeccable's CLI has no uninstall; this is the folder install_codex_deps created.
+  rm -rf "$HOME/.agents/skills/impeccable"
+}
+
+# Not --prune: it skips deps the user had installed by hand before (no "auto" flag).
+remove_claude_deps() {
+  local dep id src
+  for dep in "${CLAUDE_DEPS[@]}"; do
+    read -r id src <<<"$dep"
+    claude plugin uninstall "$id"
+  done
+}
+
 # Claude installs dependencies itself, but only from marketplaces it already knows.
 add_claude_dep_marketplaces() {
   local dep id src
@@ -64,6 +83,7 @@ case "$TOOL" in
         ;;
       remove)
         codex plugin remove "$PLUGIN_ID" --json
+        remove_codex_deps
         ;;
       reload)
         codex plugin remove "$PLUGIN_ID" --json || true
@@ -86,7 +106,8 @@ case "$TOOL" in
         claude plugin details "$PLUGIN_ID"
         ;;
       remove)
-        claude plugin disable "$PLUGIN_ID"
+        claude plugin uninstall "$PLUGIN_ID"
+        remove_claude_deps
         ;;
       reload)
         add_claude_dep_marketplaces

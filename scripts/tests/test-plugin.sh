@@ -79,8 +79,12 @@ expect_calls \
 grep -qE '^trusted_hash = "sha256:[0-9a-f]{64}"$' "$FAKE_HOME/.codex/config.toml"
 
 : > "$CALL_LOG"
+mkdir -p "$FAKE_HOME/.agents/skills/impeccable"
 run codex remove >/dev/null
-expect_calls "codex plugin remove $PLUGIN_ID --json"
+expect_calls \
+  "codex plugin remove $PLUGIN_ID --json" \
+  "codex plugin remove $DEP_ID --json"
+[[ ! -e "$FAKE_HOME/.agents/skills/impeccable" ]]
 
 : > "$CALL_LOG"
 CACHE_DIR="$FAKE_HOME/.codex/plugins/cache/$MARKETPLACE_NAME/$PLUGIN_NAME"
@@ -109,7 +113,10 @@ expect_calls \
 
 : > "$CALL_LOG"
 run claude remove >/dev/null
-expect_calls "claude plugin disable $PLUGIN_ID"
+expect_calls \
+  "claude plugin uninstall $PLUGIN_ID" \
+  "claude plugin uninstall $DEP_ID" \
+  "claude plugin uninstall $CLAUDE_DEP_ID"
 
 : > "$CALL_LOG"
 run claude reload >/dev/null
