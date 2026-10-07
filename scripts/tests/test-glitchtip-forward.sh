@@ -8,7 +8,9 @@ mkdir -p "$STUB_BIN"
 CALL_LOG="$SANDBOX/calls.log"; : > "$CALL_LOG"
 PIDFILE="$SANDBOX/state/lukas-plugin/glitchtip-forward.pid"
 
-run() { XDG_STATE_HOME="$SANDBOX/state" CURL_OK="$1" PATH="$STUB_BIN:$PATH" "$SCRIPT" "$2"; }
+FAKE_HOME="$SANDBOX/home"
+mkdir -p "$FAKE_HOME"
+run() { HOME="$FAKE_HOME" CODEX_HOME="$FAKE_HOME/.codex" XDG_STATE_HOME="$SANDBOX/state" CURL_OK="$1" PATH="$STUB_BIN:$PATH" "$SCRIPT" "$2"; }
 trap 'run 0 stop || true; rm -rf "$SANDBOX"' EXIT
 
 # kubectl stub: port-forward blocks like the real one; curl stub: port served iff CURL_OK=1.
@@ -25,6 +27,11 @@ STUB
 chmod +x "$STUB_BIN"/*
 
 wait_for() { for _ in $(seq 50); do eval "$1" && return 0; sleep 0.1; done; echo "timeout: $1" >&2; exit 1; }
+
+# glitchtip MCP not enabled in either tool: start is a no-op.
+run 0 start
+[[ ! -e "$PIDFILE" ]]
+echo '{"mcpServers":{"glitchtip":{}}}' > "$FAKE_HOME/.claude.json"
 
 # Port not served: starts a pinned-context port-forward, and a second start is a no-op.
 run 0 start

@@ -84,6 +84,7 @@ case "$TOOL" in
       remove)
         codex plugin remove "$PLUGIN_ID" --json
         remove_codex_deps
+        "$ROOT_DIR/scripts/mcp.sh" codex disable
         "$ROOT_DIR/scripts/glitchtip-forward.sh" stop
         ;;
       reload)
@@ -109,6 +110,7 @@ case "$TOOL" in
       remove)
         claude plugin uninstall "$PLUGIN_ID"
         remove_claude_deps
+        "$ROOT_DIR/scripts/mcp.sh" claude disable
         "$ROOT_DIR/scripts/glitchtip-forward.sh" stop
         ;;
       reload)

@@ -7,7 +7,6 @@
   },
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
-  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Lukas's Plugin",
     "shortDescription": "Personal plugin",

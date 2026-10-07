@@ -10,6 +10,7 @@ DEP_ID="ponytail@ponytail"
 DEP_SRC="DietrichGebert/ponytail"
 CLAUDE_DEP_ID="impeccable@impeccable"
 CLAUDE_DEP_SRC="pbakaus/impeccable"
+MCP_NAMES=($(jq -r '.mcpServers | keys[]' "$ROOT_DIR/mcp/servers.json"))
 IMPECCABLE_CODEX="npx -y impeccable install --providers=codex --scope=user --yes --no-hooks"
 
 SANDBOX="$(mktemp -d)"
@@ -83,7 +84,8 @@ mkdir -p "$FAKE_HOME/.agents/skills/impeccable"
 run codex remove >/dev/null
 expect_calls \
   "codex plugin remove $PLUGIN_ID --json" \
-  "codex plugin remove $DEP_ID --json"
+  "codex plugin remove $DEP_ID --json" \
+  "${MCP_NAMES[@]/#/codex mcp remove }"
 [[ ! -e "$FAKE_HOME/.agents/skills/impeccable" ]]
 
 : > "$CALL_LOG"
@@ -116,7 +118,8 @@ run claude remove >/dev/null
 expect_calls \
   "claude plugin uninstall $PLUGIN_ID" \
   "claude plugin uninstall $DEP_ID" \
-  "claude plugin uninstall $CLAUDE_DEP_ID"
+  "claude plugin uninstall $CLAUDE_DEP_ID" \
+  "${MCP_NAMES[@]/#/claude mcp remove -s user }"
 
 : > "$CALL_LOG"
 run claude reload >/dev/null
