@@ -104,6 +104,8 @@ expect_calls \
 [[ "$(trust_count "$DEP_ID")" == 1 ]]
 
 : > "$CALL_LOG"
+denied_count() { jq '[.deniedMcpServers[]? | select(.serverName == "claude.ai Notion")] | length' "$FAKE_HOME/.claude/settings.json"; }
+mkdir -p "$FAKE_HOME/.claude" && echo '{"model":"keep"}' > "$FAKE_HOME/.claude/settings.json"
 run claude install >/dev/null
 expect_calls \
   "claude plugin marketplace add $DEP_SRC" \
@@ -114,6 +116,8 @@ expect_calls \
   "claude plugin details $PLUGIN_ID"
 
 : > "$CALL_LOG"
+[[ "$(denied_count)" == 1 ]]
+
 run claude remove >/dev/null
 expect_calls \
   "claude plugin uninstall $PLUGIN_ID" \
@@ -121,6 +125,13 @@ expect_calls \
   "claude plugin uninstall $CLAUDE_DEP_ID" \
   "${MCP_NAMES[@]/#/claude mcp remove -s user }"
 
+: > "$CALL_LOG"
+[[ "$(denied_count)" == 0 ]]
+jq -e '.model == "keep" and (has("deniedMcpServers") | not)' "$FAKE_HOME/.claude/settings.json" >/dev/null
+
+run claude reload >/dev/null
+run claude reload >/dev/null
+[[ "$(denied_count)" == 1 ]]
 : > "$CALL_LOG"
 run claude reload >/dev/null
 expect_calls \

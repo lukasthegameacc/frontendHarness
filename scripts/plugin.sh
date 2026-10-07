@@ -62,6 +62,20 @@ remove_claude_deps() {
   done
 }
 
+# claude.ai's Notion connector is tied to the claude.ai login's Notion account; block it so
+# mcp/servers.json's notion (own OAuth, any account) is the only one. User settings honor deniedMcpServers.
+DENIED_CONNECTOR="claude.ai Notion"
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+
+edit_claude_settings() {
+  local tmp
+  [ -f "$CLAUDE_SETTINGS" ] || echo '{}' > "$CLAUDE_SETTINGS"
+  tmp="$(mktemp)"
+  jq --arg n "$DENIED_CONNECTOR" "$1" "$CLAUDE_SETTINGS" > "$tmp" && mv "$tmp" "$CLAUDE_SETTINGS"
+}
+deny_claude_connector() { edit_claude_settings '.deniedMcpServers = ((.deniedMcpServers // []) - [{serverName: $n}] + [{serverName: $n}])'; }
+allow_claude_connector() { edit_claude_settings '.deniedMcpServers = ((.deniedMcpServers // []) - [{serverName: $n}]) | if .deniedMcpServers == [] then del(.deniedMcpServers) else . end'; }
+
 # Claude installs dependencies itself, but only from marketplaces it already knows.
 add_claude_dep_marketplaces() {
   local dep id src
@@ -105,12 +119,14 @@ case "$TOOL" in
         claude plugin marketplace add "$ROOT_DIR"
         claude plugin install "$PLUGIN_ID"
         claude plugin enable "$PLUGIN_ID"
+        deny_claude_connector
         claude plugin details "$PLUGIN_ID"
         ;;
       remove)
         claude plugin uninstall "$PLUGIN_ID"
         remove_claude_deps
         "$ROOT_DIR/scripts/mcp.sh" claude disable
+        allow_claude_connector
         "$ROOT_DIR/scripts/glitchtip-forward.sh" stop
         ;;
       reload)
@@ -119,6 +135,7 @@ case "$TOOL" in
         # `plugin update` is a no-op while the version stays 0.1.0, so reinstall to refresh the cache.
         claude plugin uninstall "$PLUGIN_ID" || true
         claude plugin install "$PLUGIN_ID"
+        deny_claude_connector
         claude plugin details "$PLUGIN_ID"
         ;;
       *) usage ;;
