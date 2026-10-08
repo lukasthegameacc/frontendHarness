@@ -39,5 +39,13 @@ expect_calls 'codex|mcp|add|aws-eks|--env|FASTMCP_LOG_LEVEL=ERROR|--|uvx|awslabs
 run claude disable
 [[ "$(wc -l < "$CALL_LOG")" -eq "$(jq '.mcpServers | length' "$(dirname "$SCRIPT")/../mcp/servers.json")" ]]
 
+# list reports per-tool state from each tool's user config.
+echo '{"mcpServers":{"glitchtip":{}}}' > "$SANDBOX/home/.claude.json"
+mkdir -p "$SANDBOX/home/.codex" && printf '[mcp_servers.notion]\nurl = "x"\n' > "$SANDBOX/home/.codex/config.toml"
+run claude list | grep -x "glitchtip on" >/dev/null
+run claude list | grep -x "notion off" >/dev/null
+run codex list | grep -x "notion on" >/dev/null
+run codex list | grep -x "glitchtip off" >/dev/null
+
 ! run claude enable nope 2>/dev/null
 echo "ok"

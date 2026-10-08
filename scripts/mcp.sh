@@ -42,6 +42,13 @@ enable_codex() {
   codex mcp add "$1" "${args[@]}"
 }
 
+is_enabled() {
+  case "$TOOL" in
+    claude) jq -e --arg n "$1" '.mcpServers[$n]' "$HOME/.claude.json" >/dev/null 2>&1 ;;
+    codex) grep -q "^\[mcp_servers\.$1\]" "${CODEX_HOME:-$HOME/.codex}/config.toml" 2>/dev/null ;;
+  esac
+}
+
 disable() {
   case "$TOOL" in
     claude) claude mcp remove -s user "$1" ;;
@@ -53,7 +60,9 @@ case "$TOOL" in claude|codex) ;; *) usage ;; esac
 
 case "$ACTION" in
   list)
-    jq -r '.mcpServers | keys[]' "$CATALOG"
+    for n in $(jq -r '.mcpServers | keys[]' "$CATALOG"); do
+      if is_enabled "$n"; then echo "$n on"; else echo "$n off"; fi
+    done
     ;;
   enable)
     [ $# -gt 0 ] || usage
